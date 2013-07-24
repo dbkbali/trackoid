@@ -4,3 +4,5 @@ source "http://rubygems.org"
 # Bundler will treat runtime dependencies like base dependencies, and
 # development dependencies will be added by default to the :development group.
 gemspec
+
+gem "mongoid", :git => "https://github.com/mongoid/mongoid.git", :ref => '06b708d'

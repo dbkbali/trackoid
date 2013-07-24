@@ -32,7 +32,6 @@ module Mongoid #:nodoc:
         update_aggregates(name.to_sym) if aggregated?
       end
 
-      protected
       # Returns the internal representation of the tracked field name
       def internal_track_name(name)
         "#{name}_data".to_sym

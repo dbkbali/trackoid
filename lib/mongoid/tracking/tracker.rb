@@ -43,7 +43,7 @@ module Mongoid  #:nodoc:
         # read the actual value in return so that we save round trip delays.
         #
         update_data(data_for(date) + how_much, date)
-        @owner.inc(store_key(date), how_much.abs)
+        @owner.inc(store_key(date) => how_much.abs)
 
         return unless @owner.aggregated?
 
@@ -69,7 +69,7 @@ module Mongoid  #:nodoc:
         raise Errors::ModelNotSaved, "Can't update a new record" if @owner.new_record?
         update_data(how_much, date)
 
-        @owner.set(store_key(date), how_much)
+        @owner.set(store_key(date) => how_much)
 
         return unless @owner.aggregated?
 

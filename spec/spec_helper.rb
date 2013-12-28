@@ -6,6 +6,8 @@ require 'mongoid'
 require 'trackoid'
 require 'rspec'
 require 'rspec/autorun'
+require 'ruby-debug'
+
 
 RSpec.configure do |config|
   config.before(:suite) do

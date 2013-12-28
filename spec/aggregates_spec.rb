@@ -25,7 +25,7 @@ class SecondTestModel
 
   aggregate :aggregate_one do 1 end
   aggregate :aggregate_two do "p" end
-  aggregate :aggregate_three do Moped::BSON::ObjectId.new end
+  aggregate :aggregate_three do BSON::ObjectId.new end
   aggregate :aggregate_four do Time.now end
 end
 
@@ -253,13 +253,13 @@ describe Mongoid::Tracking::Aggregates do
     end
 
     it "should have 1 visits last 7 days" do
-      test_model.visits("Mozilla Firefox").inc      
+      test_model.visits("Mozilla Firefox").inc
       test_model.visits.browsers.last_days(7).should == [["mozilla", [0, 0, 0, 0, 0, 0, 1]]]
       test_model.visits.referers.last_days(7).should == [["firefox", [0, 0, 0, 0, 0, 0, 1]]]
     end
 
     it "should work also for arbitrary days" do
-      test_model.visits("Mozilla Firefox").inc      
+      test_model.visits("Mozilla Firefox").inc
       test_model.visits.browsers.last_days(15).should == [["mozilla", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]]]
       test_model.visits.referers.last_days(15).should == [["firefox", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]]]
     end
@@ -463,17 +463,17 @@ describe Mongoid::Tracking::Aggregates do
 
   describe "When using models with same name on different namespaces" do
     let(:test_person1) do
-      MyCompany::TestPerson.create(my_name: "twoixter") 
+      MyCompany::TestPerson.create(my_name: "twoixter")
     end
 
     let(:test_person2) do
       YourCompany::TestPerson.create(your_name: "test")
     end
 
-    before do      
+    before do
       test_person1.logins("ASCII").set(1, "2012-07-07")
       test_person1.logins("EBCDIC").set(1, "2012-07-07")
-      
+
       test_person2.logins("UTF8").set(1, "2012-07-07")
       test_person2.logins("LATIN1").set(1, "2012-07-07")
     end

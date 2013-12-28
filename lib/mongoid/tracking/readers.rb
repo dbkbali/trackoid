@@ -4,6 +4,8 @@ module Mongoid  #:nodoc:
     # Reader methods (previously known as "accessors")
     module Readers
 
+
+
       # Access methods
       def today
         whole_data_for(Time.now)

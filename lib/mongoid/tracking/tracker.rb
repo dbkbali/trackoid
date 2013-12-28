@@ -4,6 +4,7 @@ module Mongoid  #:nodoc:
     # This internal class handles all interaction for a track field.
     class Tracker
 
+
       include Readers
 
       def initialize(owner, field, aggregate_data)
@@ -26,6 +27,7 @@ module Mongoid  #:nodoc:
       #
       #   <tt>@object.visits.browsers ...</tt>
       #
+
       def method_missing(name, *args, &block)
         super unless @owner.aggregate_fields.member?(name)
         @owner.send("#{name}_with_track".to_sym, @for, *args, &block)
@@ -68,7 +70,6 @@ module Mongoid  #:nodoc:
       def set(how_much, date = Time.now)
         raise Errors::ModelNotSaved, "Can't update a new record" if @owner.new_record?
         update_data(how_much, date)
-
         @owner.set(store_key(date) => how_much)
 
         return unless @owner.aggregated?
@@ -204,6 +205,7 @@ module Mongoid  #:nodoc:
       def store_key(date)
         "#{@for_data}.#{normalize_date(date).to_key}"
       end
+
 
       def update_hash(num, date)
         { store_key(date) => num }

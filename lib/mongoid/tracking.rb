@@ -29,8 +29,14 @@ module Mongoid #:nodoc:
       def track(name)
         set_tracking_field(name.to_sym)
         create_tracking_accessors(name.to_sym)
+        create_tracked_fields(name)
         update_aggregates(name.to_sym) if aggregated?
       end
+
+      def create_tracked_fields(name)
+        field "#{name}_data".to_sym, type: Hash, default: {}
+      end
+
 
       # Returns the internal representation of the tracked field name
       def internal_track_name(name)

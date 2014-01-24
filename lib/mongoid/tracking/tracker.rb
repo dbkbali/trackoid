@@ -49,13 +49,13 @@ module Mongoid  #:nodoc:
 
         return unless @owner.aggregated?
 
-        @owner.aggregate_fields.each do |k, v|
-          next unless token = v.call(@aggregate_data)
-          fk = @owner.class.name.to_s.foreign_key.to_sym
-          selector = { fk => @owner.id, ns: k, key: token.to_s }
+       @owner.aggregate_fields.each do |k, v|
+         next unless token = v.call(@aggregate_data)
+         fk = @owner.class.name.to_s.foreign_key.to_sym
+         selector = { fk => @owner.id, ns: k, key: token.to_s }
 
-          docs = @owner.aggregate_klass.collection.find(selector)
-          docs.upsert("$inc" => update_hash(how_much.abs, date))
+         docs = @owner.aggregate_klass.collection.find(selector)
+         docs.upsert("$inc" => update_hash(how_much.abs, date))
         end
       end
 
@@ -70,8 +70,15 @@ module Mongoid  #:nodoc:
       def set(how_much, date = Time.now)
         raise Errors::ModelNotSaved, "Can't update a new record" if @owner.new_record?
         update_data(how_much, date)
-        @owner.set(store_key(date) => how_much)
-
+        #debugger
+        date = normalize_date(date)
+        if @owner.send(@for_data).empty?
+          @owner.set(@for_data => {date.to_key_timestamp => {date.to_key_hour => how_much}})
+        else
+          current_data = @owner.send(@for_data)
+          current_data.merge!({date.to_key_timestamp => {date.to_key_hour => how_much}})
+          @owner.set(@for_data => current_data)
+        end
         return unless @owner.aggregated?
 
         @owner.aggregate_fields.each do |(k,v)|
@@ -79,9 +86,9 @@ module Mongoid  #:nodoc:
           fk = @owner.class.name.to_s.foreign_key.to_sym
           selector = { fk => @owner.id, ns: k, key: token.to_s }
 
-          docs = @owner.aggregate_klass.collection.find(selector)
-          docs.upsert("$set" => update_hash(how_much.abs, date))
-        end
+         docs = @owner.aggregate_klass.collection.find(selector)
+         docs.upsert("$set" => update_hash(how_much.abs, date))
+       end
       end
 
       def reset(how_much, date = Time.now)
@@ -93,7 +100,7 @@ module Mongoid  #:nodoc:
 
         # Need to iterate over all aggregates and send an update or delete
         # operations over all mongo records for this aggregate field
-        @owner.aggregate_fields.each do |(k,v)|
+         @owner.aggregate_fields.each do |(k,v)|
           fk = @owner.class.name.to_s.foreign_key.to_sym
           selector = { fk => @owner.id, ns: k }
           docs = @owner.aggregate_klass.collection.find(selector)
@@ -112,13 +119,13 @@ module Mongoid  #:nodoc:
 
         # Need to iterate over all aggregates and send an update or delete
         # operations over all mongo records
-        @owner.aggregate_fields.each do |(k,v)|
-          fk = @owner.class.name.to_s.foreign_key.to_sym
-          selector = { fk => @owner.id, ns: k }
+       @owner.aggregate_fields.each do |(k,v)|
+         fk = @owner.class.name.to_s.foreign_key.to_sym
+         selector = { fk => @owner.id, ns: k }
 
-          docs = @owner.aggregate_klass.collection.find(selector)
-          docs.update_all("$unset" => update_hash(1, date))
-        end
+         docs = @owner.aggregate_klass.collection.find(selector)
+         docs.update_all("$unset" => update_hash(1, date))
+       end
       end
 
       private

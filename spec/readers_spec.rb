@@ -41,6 +41,25 @@ describe "Testing Readers with a model" do
     @mock.visits.last_value.should == 10
     @mock.visits.first_value.should == 5
   end
+
+  it "should return the total if a value is set" do
+    @mock.visits.set(1, "2010-07-11")
+    @mock.visits.set(2, "2010-07-12")
+    @mock.visits.set(3, "2010-07-13")
+    @mock.visits.all_values.sum.should == 6
+    @mock.visits.all_values_total.should == 6
+  end
+
+
+  it "should return the total if a value is set" do
+    #@mock.visits.set(nil, "2010-07-11")
+    #@mock.visits.set(nil, "2010-07-12")
+    #@mock.visits.set(3, "2010-07-13")
+    @mock.visits.all_values.should == nil
+    @mock.visits.all_values_total.should == 0
+  end
+
+
 end
 
 

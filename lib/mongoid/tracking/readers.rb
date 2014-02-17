@@ -41,6 +41,11 @@ module Mongoid  #:nodoc:
         on(first_date..last_date) if first_date
       end
 
+      def all_values_total
+        return all_values.sum.to_i if all_values && !all_values.nil?
+        return 0
+      end
+
       # Utility methods
       def first_date
         date_cleanup

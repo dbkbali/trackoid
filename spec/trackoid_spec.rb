@@ -53,8 +53,9 @@ describe Mongoid::Tracking do
       @mock = Test.new
     end
 
-    it "should create a method for accesing the stats" do
-      @mock.respond_to?(:visits).should be_true
+    it "should create a method for accesing the stats after save" do
+      @mock.save
+      @mock.visits_data.should eq({})
     end
 
     it "should NOT create an index for the stats field" do
@@ -77,7 +78,7 @@ describe Mongoid::Tracking do
     end
 
     it "should not update stats when new record" do
-      -> { @mock.visits.inc }.should raise_error Mongoid::Tracking::Errors::ModelNotSaved
+      @mock.visits.inc.should be nil
     end
 
     it "should create an empty hash as the internal representation" do

@@ -6,7 +6,7 @@ require 'mongoid'
 require 'trackoid'
 require 'rspec'
 require 'rspec/autorun'
-require 'ruby-debug'
+require 'byebug'
 
 
 RSpec.configure do |config|

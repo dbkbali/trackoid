@@ -5,6 +5,6 @@ source "http://rubygems.org"
 # development dependencies will be added by default to the :development group.
 gemspec
 
-gem "mongoid", "~> 4.0.0.rc2"
+gem "mongoid", "~> 4.0.0"
 
 

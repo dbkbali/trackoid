@@ -5,13 +5,16 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'mongoid'
 require 'trackoid'
 require 'rspec'
-require 'rspec/autorun'
-require 'ruby-debug'
+#require 'rspec/autorun'
+require 'pry'
 
 
 RSpec.configure do |config|
   config.before(:suite) do
   	Mongoid.load!(File.expand_path(File.dirname(__FILE__) + "/../config/mongoid.yml"), :test)
+  end
+  config.expect_with :rspec do |c|
+    c.syntax = [:should, :expect]
   end
 
   config.after(:each) do

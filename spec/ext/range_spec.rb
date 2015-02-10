@@ -7,8 +7,8 @@ describe Range do
     end
 
     it "should work for normal ranges" do
-      (0..2).diff.should == 3
-      (0...2).diff.should == 2
+      expect((0..2).diff).to eq 3
+      expect((0...2).diff).to eq 2
     end
 
     it "should work for Time ranges (DAYS)" do
@@ -16,17 +16,17 @@ describe Range do
       inc_range = now..(now + 1*Range::DAYS)
       exc_range = now...(now + 1*Range::DAYS)
 
-      inc_range.diff.should == 2
-      exc_range.diff.should == 1
+      expect(inc_range.diff).to eq 2
+      expect(exc_range.diff).to eq 1
     end
-    
+
     it "should work for Time ranges (HOURS)" do
       now = Time.now
       inc_range = now..(now + 10*Range::HOURS)
       exc_range = now...(now + 10*Range::HOURS)
 
-      inc_range.diff(Range::HOURS).should == 11
-      exc_range.diff(Range::HOURS).should == 10
+      expect(inc_range.diff(Range::HOURS)).to eq 11
+      expect(exc_range.diff(Range::HOURS)).to eq 10
     end
 
     it "should also work when using helper methods" do
@@ -34,8 +34,8 @@ describe Range do
       inc_range = now..(now + 10*Range::HOURS)
       exc_range = now...(now + 10*Range::HOURS)
 
-      inc_range.hour_diff.should == 11
-      exc_range.hour_diff.should == 10
+      expect(inc_range.hour_diff).to eq 11
+      expect(exc_range.hour_diff).to eq 10
     end
 
     it "should behave like normal ranges for 1 element" do
@@ -43,8 +43,8 @@ describe Range do
       inc_range = now..now
       exc_range = now...now
 
-      inc_range.diff.should == 1
-      exc_range.diff.should == 0
+      expect(inc_range.diff).to eq 1
+      expect(exc_range.diff).to eq 0
     end
 
     it "should keep Time UTC and DST properties" do
@@ -65,7 +65,7 @@ describe Range do
     it "should work for normal ranges (using enumerator)" do
       inc_result = (0..2).map.to_a
       inc_result.should == [0, 1, 2]
-      
+
       exc_result = (0...2).map.to_a
       exc_result.should == [0, 1]
     end
@@ -73,7 +73,7 @@ describe Range do
     it "should work for normal ranges (using block)" do
       inc_result = (0..2).map {|e| e}
       inc_result.should == [0, 1, 2]
-      
+
       exc_result = (0...2).map {|e| e}
       exc_result.should == [0, 1]
     end
@@ -95,12 +95,12 @@ describe Range do
       exc_result = exc_range.map {|d| d.to_i_timestamp}
       exc_result.should == []
     end
-    
+
     it "should return an array if no block given" do
       date = Time.utc(2011, 4, 1, 0, 0)
       result = (date..(date + 5*Range::DAYS)).map
       result.count.should == 6
-      
+
       # Result is now an array
       result.map(&:to_i_timestamp).should == [15065, 15066, 15067, 15068, 15069, 15070]
     end

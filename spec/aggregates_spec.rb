@@ -64,17 +64,17 @@ describe Mongoid::Tracking::Aggregates do
   end
 
   it "should define a class model named after the original model" do
-    defined?(TestModelAggregates).should_not be_nil
+    expect(defined?(TestModelAggregates)).not_to eq(nil)
   end
 
   it "should define a class model named after the original second model" do
-    defined?(SecondTestModelAggregates).should_not be_nil
+    expect(defined?(SecondTestModelAggregates)).not_to eq(nil)
   end
 
   it "should create a has_many relationship in the original model" do
     # Note that due to ActiveSupport "class_inheritable_accessor" this method
     # is available both as class method and instance method.
-    @mock.class.method_defined?(:browsers_accessor).should be_true
+    expect(@mock.class.method_defined?(:browsers_accessor)).to eq true
   end
 
   it "should have the aggregates klass in a class/instance var" do
@@ -86,7 +86,7 @@ describe Mongoid::Tracking::Aggregates do
   it "should create a hash in the class with all aggregate fields" do
     # Note that due to ActiveSupport "class_inheritable_accessor" this method
     # is available both as class method and instance method.
-    @mock.class.aggregate_fields.keys.to_set.should == [ :browsers, :referers ].to_set
+    expect(@mock.class.aggregate_fields.keys.to_set).to eq [ :browsers, :referers ].to_set
   end
 
   it "should create an array in the class with all aggregate fields even when monkey patching" do
@@ -95,50 +95,50 @@ describe Mongoid::Tracking::Aggregates do
         "Q1";
       end
     end
-    @mock.class.aggregate_fields.keys.to_set.should == [ :browsers, :referers, :quarters ].to_set
+    expect(@mock.class.aggregate_fields.keys.to_set).to eq [ :browsers, :referers, :quarters ].to_set
   end
 
   it "the aggregated class should have the same tracking fields as the parent class" do
-    TestModelAggregates.tracked_fields.should == TestModel.tracked_fields
+    expect(TestModelAggregates.tracked_fields).to eq TestModel.tracked_fields
   end
 
   it "should raise error if we try to add an aggregation token twice" do
-    lambda {
+    expect {
       class TestModel
         aggregate :referers do
           "(none)"
         end
       end
-    }.should raise_error Mongoid::Tracking::Errors::AggregationAlreadyDefined
+    }.to raise_error Mongoid::Tracking::Errors::AggregationAlreadyDefined
   end
 
   it "should raise error if we try to use 'hours' as aggregate" do
-    lambda {
+    expect {
       class TestModel
         aggregate :hours do
           "(none)"
         end
       end
-    }.should raise_error Mongoid::Tracking::Errors::AggregationNameDeprecated
+    }.to raise_error Mongoid::Tracking::Errors::AggregationNameDeprecated
   end
 
   it "should have Mongoid accessors defined" do
     tm = TestModel.create(:name => "Dummy")
-    tm.send(tm.class.send(:internal_accessor_name, "browsers")).class.should == Mongoid::Relations::Targets::Enumerable
-    tm.send(tm.class.send(:internal_accessor_name, "referers")).class.should == Mongoid::Relations::Targets::Enumerable
-    tm.send(tm.class.send(:internal_accessor_name, "quarters")).class.should == Mongoid::Relations::Targets::Enumerable
+    expect(tm.send(tm.class.send(:internal_accessor_name, "browsers")).class).to eq Mongoid::Relations::Targets::Enumerable
+    expect(tm.send(tm.class.send(:internal_accessor_name, "referers")).class).to eq Mongoid::Relations::Targets::Enumerable
+    expect(tm.send(tm.class.send(:internal_accessor_name, "quarters")).class).to eq Mongoid::Relations::Targets::Enumerable
   end
 
   it "should indicate this is an aggregated traking object with aggregated?" do
-    @mock.aggregated?.should be_true
+    expect(@mock.aggregated?).to eq true
   end
 
   it "should indicate this is an aggregated class with aggregated?" do
-    @mock.class.aggregated?.should be_true
+    expect(@mock.class.aggregated?).to eq true
   end
 
   it "should raise error if already defined class with the same aggregated klass name" do
-    lambda {
+    expect {
       class MockTestAggregates
         def dummy; true; end
       end
@@ -150,11 +150,11 @@ describe Mongoid::Tracking::Aggregates do
           "other"
         end
       end
-    }.should raise_error Mongoid::Tracking::Errors::ClassAlreadyDefined
+    }.to raise_error Mongoid::Tracking::Errors::ClassAlreadyDefined
   end
 
   it "should NOT raise error if the already defined class is our aggregated model" do
-    lambda {
+    expect {
       class MockTest2
         include Mongoid::Document
         include Mongoid::Tracking
@@ -168,11 +168,11 @@ describe Mongoid::Tracking::Aggregates do
           "other"
         end
       end
-    }.should_not raise_error Mongoid::Tracking::Errors::ClassAlreadyDefined
+    }.not_to raise_error #Mongoid::Tracking::Errors::ClassAlreadyDefined
   end
 
   it "should raise error although the already defined class includes tracking" do
-    lambda {
+    expect {
       class MockTest3Aggregates
         include Mongoid::Document
         include Mongoid::Tracking
@@ -186,7 +186,7 @@ describe Mongoid::Tracking::Aggregates do
           "other"
         end
       end
-    }.should raise_error Mongoid::Tracking::Errors::ClassAlreadyDefined
+    }.to raise_error Mongoid::Tracking::Errors::ClassAlreadyDefined
   end
 
   describe "testing different object class for aggregation key" do
@@ -196,18 +196,18 @@ describe Mongoid::Tracking::Aggregates do
 
     it "should correctly save all aggregation keys as strings (inc)" do
       second_test_model.something("test").inc
-      second_test_model.something.aggregate_one.first.key.is_a?(String).should be_true
-      second_test_model.something.aggregate_two.first.key.is_a?(String).should be_true
-      second_test_model.something.aggregate_three.first.key.is_a?(String).should be_true
-      second_test_model.something.aggregate_four.first.key.is_a?(String).should be_true
+      expect(second_test_model.something.aggregate_one.first.key.is_a?(String)).to eq true
+      expect(second_test_model.something.aggregate_two.first.key.is_a?(String)).to eq true
+      expect(second_test_model.something.aggregate_three.first.key.is_a?(String)).to eq true
+      expect(second_test_model.something.aggregate_four.first.key.is_a?(String)).to eq true
     end
 
     it "should correctly save all aggregation keys as strings (set)" do
       second_test_model.something("test").set(5)
-      second_test_model.something.aggregate_one.first.key.is_a?(String).should be_true
-      second_test_model.something.aggregate_two.first.key.is_a?(String).should be_true
-      second_test_model.something.aggregate_three.first.key.is_a?(String).should be_true
-      second_test_model.something.aggregate_four.first.key.is_a?(String).should be_true
+      expect(second_test_model.something.aggregate_one.first.key.is_a?(String)).to eq true
+      expect(second_test_model.something.aggregate_two.first.key.is_a?(String)).to eq true
+      expect(second_test_model.something.aggregate_three.first.key.is_a?(String)).to eq true
+      expect(second_test_model.something.aggregate_four.first.key.is_a?(String)).to eq true
     end
   end
 
@@ -217,74 +217,74 @@ describe Mongoid::Tracking::Aggregates do
     end
 
     it "calling an aggregation scope should return the appropiate class" do
-      test_model.browsers.class.should == Mongoid::Tracking::TrackerAggregates
+      expect(test_model.browsers.class).to eq Mongoid::Tracking::TrackerAggregates
     end
 
     it "should increment visits for all aggregated instances" do
       test_model.visits("Mozilla Firefox").inc
-      test_model.browsers.count.should == 1
-      test_model.referers.count.should == 1
-      test_model.quarters.count.should == 1
+      expect(test_model.browsers.count).to eq 1
+      expect(test_model.referers.count).to eq 1
+      expect(test_model.quarters.count).to eq 1
     end
 
     it "should increment visits for specific aggregation keys" do
       test_model.visits("Mozilla Firefox").inc
-      test_model.browsers("mozilla").size.should == 1
-      test_model.referers("firefox").size.should == 1
-      test_model.quarters("Q1").size.should == 1
+      expect(test_model.browsers("mozilla").size).to eq 1
+      expect(test_model.referers("firefox").size).to eq 1
+      expect(test_model.quarters("Q1").size).to eq 1
     end
 
     it "should NOT increment visits for different aggregation keys" do
-      test_model.browsers("internet explorer").size.should == 0
-      test_model.referers("yahoo slurp").size.should == 0
-      test_model.quarters("Q2").size.should == 0
+      expect(test_model.browsers("internet explorer").size).to eq 0
+      expect(test_model.referers("yahoo slurp").size).to eq 0
+      expect(test_model.quarters("Q2").size).to eq 0
     end
 
     it "should have 1 visits today" do
       test_model.visits("Mozilla Firefox").inc
-      test_model.visits.browsers.today.should == [["mozilla", 1]]
-      test_model.visits.referers.today.should == [["firefox", 1]]
+      expect(test_model.visits.browsers.today).to eq [["mozilla", 1]]
+      expect(test_model.visits.referers.today).to eq [["firefox", 1]]
     end
 
     it "should have 0 visits yesterday" do
       test_model.visits("Mozilla Firefox").inc
-      test_model.visits.browsers.yesterday.should == [["mozilla", 0]]
-      test_model.visits.referers.yesterday.should == [["firefox", 0]]
+      expect(test_model.visits.browsers.yesterday).to eq [["mozilla", 0]]
+      expect(test_model.visits.referers.yesterday).to eq [["firefox", 0]]
     end
 
     it "should have 1 visits last 7 days" do
       test_model.visits("Mozilla Firefox").inc
-      test_model.visits.browsers.last_days(7).should == [["mozilla", [0, 0, 0, 0, 0, 0, 1]]]
-      test_model.visits.referers.last_days(7).should == [["firefox", [0, 0, 0, 0, 0, 0, 1]]]
+      expect(test_model.visits.browsers.last_days(7)).to eq [["mozilla", [0, 0, 0, 0, 0, 0, 1]]]
+      expect(test_model.visits.referers.last_days(7)).to eq [["firefox", [0, 0, 0, 0, 0, 0, 1]]]
     end
 
     it "should work also for arbitrary days" do
       test_model.visits("Mozilla Firefox").inc
-      test_model.visits.browsers.last_days(15).should == [["mozilla", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]]]
-      test_model.visits.referers.last_days(15).should == [["firefox", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]]]
+      expect(test_model.visits.browsers.last_days(15)).to eq [["mozilla", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]]]
+      expect(test_model.visits.referers.last_days(15)).to eq [["firefox", [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]]]
     end
 
     it "should work adding 1 visit with different aggregation data" do
       test_model.visits("Mozilla Firefox").inc
       test_model.visits("Google Chrome").inc
-      test_model.visits.browsers.today.should =~ [["mozilla", 1], ["google", 1]]
-      test_model.visits.referers.today.should =~ [["firefox", 1], ["chrome", 1]]
+      expect(test_model.visits.browsers.today).to match [["mozilla", 1], ["google", 1]]
+      expect(test_model.visits.referers.today).to match [["firefox", 1], ["chrome", 1]]
 
       # Just for testing array manipulations
-      test_model.visits.browsers.today.inject(0) {|total, c| c.last + total }.should == 2
+      expect(test_model.visits.browsers.today.inject(0) {|total, c| c.last + total }).to eq 2
     end
 
     it "should return only values when specifying the aggregation key" do
       test_model.visits("Mozilla Firefox").inc
-      test_model.visits.browsers("mozilla").today.should == 1
+      expect(test_model.visits.browsers("mozilla").today).to eq 1
     end
 
     it "should work also with set" do
       test_model.visits("Mozilla Firefox").inc
       test_model.visits("Google Chrome").set(5)
-      test_model.visits.browsers.today.should =~ [["mozilla", 1], ["google", 5]]
-      test_model.visits.referers.today.should =~ [["firefox", 1], ["chrome", 5]]
-      test_model.visits.today.should == 5
+      expect(test_model.visits.browsers.today).to match [["mozilla", 1], ["google", 5]]
+      expect(test_model.visits.referers.today).to match [["firefox", 1], ["chrome", 5]]
+      expect(test_model.visits.today).to eq 5
     end
 
     it "should work without aggregation information" do
@@ -293,13 +293,13 @@ describe Mongoid::Tracking::Aggregates do
       test_model.visits.inc
 
 
-      test_model.visits.browsers.today.should =~ [["mozilla", 1], ["google", 6]]
-      test_model.visits.referers.today.should =~ [["firefox", 1], ["chrome", 6]]
+      expect(test_model.visits.browsers.today).to match [["mozilla", 1], ["google", 6]]
+      expect(test_model.visits.referers.today).to match [["firefox", 1], ["chrome", 6]]
 
       # A more throughout test would check totals...
       visits_today = test_model.visits.today
       visits_today_with_browser = test_model.visits.browsers.today.inject(0) {|total, c| c.last + total }
-      visits_today.should == visits_today_with_browser
+      expect(visits_today).to eq visits_today_with_browser
     end
   end
 
@@ -329,13 +329,13 @@ describe Mongoid::Tracking::Aggregates do
     it "should have the correct values when using a value" do
       test_model.visits.reset(99, "2010-07-14")
 
-      test_model.visits.on("2010-07-14").should == 99
-      test_model.visits.browsers.all_values.should =~ [
+      expect(test_model.visits.on("2010-07-14")).to eq 99
+      expect(test_model.visits.browsers.all_values).to match [
         ["mozilla",  [1, 0, 0, 99]],
         ["google",   [2, 0, 0, 99]],
         ["internet", [3, 0, 0, 99]]
       ]
-      test_model.visits.referers.all_values.should =~ [
+      expect(test_model.visits.referers.all_values).to match [
         ["firefox",  [1, 0, 0, 99]],
         ["chrome",   [2, 0, 0, 99]],
         ["explorer", [3, 0, 0, 99]]
@@ -344,13 +344,13 @@ describe Mongoid::Tracking::Aggregates do
 
     it "should delete the values when using nil" do
       test_model.visits.reset(nil, "2010-07-14")
-      test_model.visits.on("2010-07-14").should == 0
-      test_model.visits.browsers.all_values.should =~ [
+      expect(test_model.visits.on("2010-07-14")).to eq 0
+      expect(test_model.visits.browsers.all_values).to match [
         ["mozilla",  [1]],
         ["google",   [2]],
         ["internet", [3]]
       ]
-      test_model.visits.referers.all_values.should =~ [
+      expect(test_model.visits.referers.all_values).to match [
         ["firefox",  [1]],
         ["chrome",   [2]],
         ["explorer", [3]]
@@ -360,8 +360,8 @@ describe Mongoid::Tracking::Aggregates do
     it "erase method sould also work" do
       test_model.visits.erase("2010-07-14")
 
-      test_model.visits.on("2010-07-14").should == 0
-      test_model.visits.browsers.all_values.should =~ [
+      expect(test_model.visits.on("2010-07-14")).to eq 0
+      expect(test_model.visits.browsers.all_values).to match [
         ["mozilla",  [1]],
         ["google",   [2]],
         ["internet", [3]]
@@ -371,13 +371,13 @@ describe Mongoid::Tracking::Aggregates do
     it "should reset the correct tracking fields" do
       test_model.visits.reset(99, "2010-07-14")
 
-      test_model.uniques.on("2010-07-14").should == 6
-      test_model.uniques.browsers.all_values.should =~ [
+      expect(test_model.uniques.on("2010-07-14")).to eq 6
+      expect(test_model.uniques.browsers.all_values).to match [
         ["mozilla",  [1, 0, 0, 4]],
         ["google",   [2, 0, 0, 5]],
         ["internet", [3, 0, 0, 6]]
       ]
-      test_model.uniques.referers.all_values.should =~ [
+      expect(test_model.uniques.referers.all_values).to match [
         ["firefox",  [1, 0, 0, 4]],
         ["chrome",   [2, 0, 0, 5]],
         ["explorer", [3, 0, 0, 6]]
@@ -387,13 +387,13 @@ describe Mongoid::Tracking::Aggregates do
     it "should erase the correct tracking fields" do
       test_model.visits.erase("2010-07-14")
 
-      test_model.uniques.on("2010-07-14").should == 6
-      test_model.uniques.browsers.all_values.should =~ [
+      expect(test_model.uniques.on("2010-07-14")).to eq 6
+      expect(test_model.uniques.browsers.all_values).to match [
         ["mozilla",  [1, 0, 0, 4]],
         ["google",   [2, 0, 0, 5]],
         ["internet", [3, 0, 0, 6]]
       ]
-      test_model.uniques.referers.all_values.should =~ [
+      expect(test_model.uniques.referers.all_values).to match [
         ["firefox",  [1, 0, 0, 4]],
         ["chrome",   [2, 0, 0, 5]],
         ["explorer", [3, 0, 0, 6]]
@@ -417,11 +417,11 @@ describe Mongoid::Tracking::Aggregates do
     end
 
     it "should return the correct values for .all_values" do
-      test_model.visits.all_values.should == [1, 2, 3, 4, 5, 6]
+      expect(test_model.visits.all_values).to eq [1, 2, 3, 4, 5, 6]
     end
 
     it "should return the all values for every aggregate" do
-      test_model.visits.browsers.all_values.should =~ [
+      expect(test_model.visits.browsers.all_values).to match [
         ["mozilla",  [1, 0, 0, 4]],
         ["google",   [2, 0, 0, 5]],
         ["internet", [3, 0, 0, 6]]
@@ -429,7 +429,7 @@ describe Mongoid::Tracking::Aggregates do
     end
 
     it "should return the correct first_date for every aggregate" do
-      test_model.visits.browsers.first_date.should =~ [
+      expect(test_model.visits.browsers.first_date).to match [
         ["mozilla",  Time.parse("2010-07-11")],
         ["google",   Time.parse("2010-07-12")],
         ["internet", Time.parse("2010-07-13")]
@@ -437,7 +437,7 @@ describe Mongoid::Tracking::Aggregates do
     end
 
     it "should return the correct last_date for every aggregate" do
-      test_model.visits.browsers.last_date.should =~ [
+      expect(test_model.visits.browsers.last_date).to match [
         ["mozilla",  Time.parse("2010-07-14")],
         ["google",   Time.parse("2010-07-15")],
         ["internet", Time.parse("2010-07-16")]
@@ -445,7 +445,7 @@ describe Mongoid::Tracking::Aggregates do
     end
 
     it "should return the first value for aggregates" do
-      test_model.visits.browsers.first_value.should =~ [
+      expect(test_model.visits.browsers.first_value).to match [
         ["mozilla",  1],
         ["google",   2],
         ["internet", 3]
@@ -453,7 +453,7 @@ describe Mongoid::Tracking::Aggregates do
     end
 
     it "should return the last value for aggregates" do
-      test_model.visits.browsers.last_value.should =~ [
+      expect(test_model.visits.browsers.last_value).to match [
         ["mozilla",  4],
         ["google",   5],
         ["internet", 6]
@@ -479,12 +479,12 @@ describe Mongoid::Tracking::Aggregates do
     end
 
     it "should be different objects" do
-      test_person1.my_name.should_not == test_person2.your_name
+      expect(test_person1.my_name).not_to eq test_person2.your_name
     end
 
     it "should yield different aggregates" do
-      test_person1.logins.initials.on("2012-07-07").should =~ [["A", 1], ["E", 1]]
-      test_person2.logins.initials.on("2012-07-07").should =~ [["U", 1], ["L", 1]]
+      expect(test_person1.logins.initials.on("2012-07-07")).to match [["A", 1], ["E", 1]]
+      expect(test_person2.logins.initials.on("2012-07-07")).to match [["U", 1], ["L", 1]]
     end
   end
 end

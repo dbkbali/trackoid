@@ -54,7 +54,7 @@ describe Mongoid::Tracking do
     end
 
     it "should create a method for accesing the stats" do
-      @mock.respond_to?(:visits).should be_true
+      @mock.respond_to?(:visits).should be true
     end
 
     it "should NOT create an index for the stats field" do
@@ -248,9 +248,10 @@ describe Mongoid::Tracking do
        track :something
      end
      tm = TestModel.first
-     tm.something.today.should == 0
+     expect(tm.something.today).to eq 0
      tm.something.inc
-     tm.something.today.should == 1
+     tm.reload
+     expect(tm.something.today).to eq 1
    end
  end
 end

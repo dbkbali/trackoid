@@ -62,21 +62,20 @@ describe Mongoid::Tracking do
     let(:mock_many) { TestEmbedMany.create(:name => "Parent", :embedded_test => [{:name => "Child1"}, {:name => "Child2"} ]) }
 
     it "should have the tracking field working and not bleed to the parent" do
-      mock_one.respond_to?(:visits).should be_false
-      mock_one.embedded_test.respond_to?(:visits).should be_true
-
-      mock_many.respond_to?(:visits).should be_false
-      mock_many.embedded_test.first.respond_to?(:visits).should be_true
-      mock_many.embedded_test.last.respond_to?(:visits).should be_true
+      expect(mock_one.respond_to?(:visits)).to eq(false)
+      expect(mock_one.embedded_test.respond_to?(:visits)).to eq(true)
+      expect(mock_many.respond_to?(:visits)).to eq(false)
+      expect(mock_many.embedded_test.first.respond_to?(:visits)).to eq(true)
+      expect(mock_many.embedded_test.last.respond_to?(:visits)).to eq(true)
     end
 
     it "the tracking data should work fine" do
       mock_one.embedded_test.visits.inc(today)
-      mock_one.embedded_test.visits.on(today).should == 1
+      expect(mock_one.embedded_test.visits.on(today)).to eq 1
 
       mock_many.embedded_test.first.visits.inc(today)
-      mock_many.embedded_test.first.visits.on(today).should == 1
-      mock_many.embedded_test.last.visits.on(today).should == 0
+      expect(mock_many.embedded_test.first.visits.on(today)).to eq 1
+      expect(mock_many.embedded_test.last.visits.on(today)).to eq 0
     end
   end
 
@@ -85,13 +84,13 @@ describe Mongoid::Tracking do
     let(:outer) { TestEmbedOuter.create(:name => "Outer", :test_embed_middle => {:name => "Middle", :test_embed_final => { :name => "Final" }}) }
 
     it "should just work..." do
-      outer.respond_to?(:visits).should be_false
-      outer.test_embed_middle.respond_to?(:visits).should be_false
-      outer.test_embed_middle.test_embed_final.respond_to?(:visits).should be_true
+      expect(outer.respond_to?(:visits)).to eq(false)
+      expect(outer.test_embed_middle.respond_to?(:visits)).to eq(false)
+      expect(outer.test_embed_middle.test_embed_final.respond_to?(:visits)).to eq(true)
 
       outer.test_embed_middle.test_embed_final.visits.inc(today)
-      outer.test_embed_middle.test_embed_final.visits.on(today).should == 1
-      outer.test_embed_middle.test_embed_final.visits.on(today - 1.day).should == 0
+      expect(outer.test_embed_middle.test_embed_final.visits.on(today)).to eq 1
+      expect(outer.test_embed_middle.test_embed_final.visits.on(today - 1.day)).to eq 0
     end
   end
 end

@@ -127,7 +127,7 @@ describe Mongoid::Tracking do
         track :visits
       end
     end
-    
+
     before do
       Test.delete_all
       Test.create(:name => "test")
@@ -139,11 +139,11 @@ describe Mongoid::Tracking do
       # WARNING: Volatile test, time dependant... Do not run at 00:00:00 :-)
       t1 = Time.now.change(:hour => 0)
       t2 = Time.now.change(:hour => 23)
-
       @mock.visits.inc(t1)
       @mock.visits.inc(t2)
-      @mock.visits.today.should == 2
-      @mock.visits.today.hourly.should == [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+      @mock.reload
+      expect(@mock.visits.today.to_i).to eq 2
+      expect(@mock.visits.today.hourly).to eq [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
     end
 
     it "should correctly handle hours for UTC" do
@@ -153,8 +153,9 @@ describe Mongoid::Tracking do
 
       @mock.visits.inc(t1)
       @mock.visits.inc(t2)
-      @mock.visits.on(Time.now.utc).should == 2
-      @mock.visits.on(Time.now.utc).hourly.should == [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+      @mock.reload
+      expect(@mock.visits.on(Time.now.utc).to_i).to eq 2
+      expect(@mock.visits.on(Time.now.utc).hourly).to eq [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
     end
 
     it "Hours in Europe/Madrid (Winter time) should be shifted by 1 hour from UTC" do
@@ -166,17 +167,18 @@ describe Mongoid::Tracking do
 
       @mock.visits.inc(t1)
       @mock.visits.inc(t2)
-      
+
       # This test is interesting. We added with local TZ time but want to
       # query shifted data on UTC. We need to read the expected span dates
       # separately
+      @mock.reload
       visits = @mock.visits.on(time.utc..(time.utc + 1.day))
 
       # Data from 2010-12-31 00:00:00 UTC up to 2011-12-31 23:59:59 UTC
-      visits.first.hourly.should == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      expect(visits.first.hourly).to eq [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
       # Data from 2011-01-01 00:00:00 UTC up to 2011-01-01 23:59:59 UTC
-      visits.last.hourly.should == [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
+      expect(visits.last.hourly).to eq [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0]
     end
 
     it "Hours in Europe/Madrid (Summer time) should be shifted by 2 hour from UTC" do
@@ -188,17 +190,18 @@ describe Mongoid::Tracking do
 
       @mock.visits.inc(t1)
       @mock.visits.inc(t2)
-      
+
       # This test is interesting. We added with local TZ time but want to
       # query shifted data on UTC. We need to read the expected span dates
       # separately
+      @mock.reload
       visits = @mock.visits.on(time.utc..(time.utc + 1.day))
 
       # Data from 2011-05-31 00:00:00 UTC up to 2011-05-31 23:59:59 UTC
-      visits.first.hourly.should == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+      expect(visits.first.hourly).to eq [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
 
       # Data from 2011-06-01 00:00:00 UTC up to 2011-06-01 23:59:59 UTC
-      visits.last.hourly.should == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
+      expect(visits.last.hourly).to eq [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0]
     end
 
     it "Hours in America/Los_Angeles (Winter time) should be shifted by -8 hours from UTC" do
@@ -210,17 +213,18 @@ describe Mongoid::Tracking do
 
       @mock.visits.inc(t1)
       @mock.visits.inc(t2)
-      
+
       # This test is interesting. We added with local TZ time but want to
       # query shifted data on UTC. We need to read the expected span dates
       # separately
+      @mock.reload
       visits = @mock.visits.on(time.utc..(time.utc + 1.day))
 
       # Data from 2011-01-01 00:00:00 UTC up to 2011-01-01 23:59:59 UTC
-      visits.first.hourly.should == [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      expect(visits.first.hourly).to eq [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
       # Data from 2011-01-02 00:00:00 UTC up to 2011-01-02 23:59:59 UTC
-      visits.last.hourly.should == [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      expect(visits.last.hourly).to eq [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     end
 
     it "Hours in America/Los_Angeles (Summer time) should be shifted by -7 hours from UTC" do
@@ -232,17 +236,19 @@ describe Mongoid::Tracking do
 
       @mock.visits.inc(t1)
       @mock.visits.inc(t2)
-      
+
       # This test is interesting. We added with local TZ time but want to
       # query shifted data on UTC. We need to read the expected span dates
       # separately
+      @mock.reload
+
       visits = @mock.visits.on(time.utc..(time.utc + 1.day))
 
       # Data from 2011-01-01 00:00:00 UTC up to 2011-01-01 23:59:59 UTC
-      visits.first.hourly.should == [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      expect(visits.first.hourly).to eq [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
       # Data from 2011-01-02 00:00:00 UTC up to 2011-01-02 23:59:59 UTC
-      visits.last.hourly.should == [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      expect(visits.last.hourly).to eq [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     end
 
     it "A value set at 10am on Madrid should appear as 01am on San Francisco" do
@@ -250,13 +256,14 @@ describe Mongoid::Tracking do
 
       time = Time.parse("2011-04-19 10:00:00")
       @mock.visits.inc(time)
+      @mock.reload
       visits = @mock.visits.on(time)
-      visits.hourly.should == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      expect(visits.hourly).to eq [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
       ENV["TZ"] = "America/Los_Angeles"
       time = Time.parse("2011-04-19 01:00:00")
       visits = @mock.visits.on(time)
-      visits.hourly.should == [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      expect(visits.hourly).to eq [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     end
 
     it "A value set at 10am on Madrid should appear as 01am on San Francisco (Using offsets)" do
@@ -266,12 +273,13 @@ describe Mongoid::Tracking do
 
       time = Time.parse("2011-04-19 10:00:00").getlocal('+02:00')
       @mock.visits.inc(time)
+      @mock.reload
       visits = @mock.visits.on(time)
-      visits.hourly.should == [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      expect(visits.hourly).to eq [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
       time = Time.parse("2011-04-19 10:00:00").getlocal('-07:00')
       visits = @mock.visits.on(time)
-      visits.hourly.should == [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      expect(visits.hourly).to eq [0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     end
 
     it "A value set now on Madrid should appear shifted 9 hours on San Francisco (Using offsets)" do
@@ -282,12 +290,13 @@ describe Mongoid::Tracking do
       now = Time.now
       time = now.getlocal('+02:00')
       @mock.visits.inc(time)
+      @mock.reload
       visits = @mock.visits.on(time)
-      visits.hourly.should == Array.new(24, 0).tap {|a| a[time.hour] = 1}
+      expect(visits.hourly).to eq Array.new(24, 0).tap {|a| a[time.hour] = 1}
 
       time = now.getlocal('-07:00')
       visits = @mock.visits.on(time)
-      visits.hourly.should == Array.new(24, 0).tap {|a| a[time.hour] = 1}
+      expect(visits.hourly).to eq Array.new(24, 0).tap {|a| a[time.hour] = 1}
     end
 
   end

@@ -5,9 +5,7 @@ $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 require 'mongoid'
 require 'trackoid'
 require 'rspec'
-#require 'rspec/autorun'
 require 'pry'
-
 
 RSpec.configure do |config|
   config.before(:suite) do

@@ -20,6 +20,45 @@ module Mongoid #:nodoc:
       end
     end
 
+      def clicks_score
+    (click_percent / 10.0).round
+  end
+
+  def  click_percent
+    return 0 if impressions_count.eql?(0) ||  clicks.eql?(0)
+    if !impressions_count.eql?(0)
+      (( clicks.to_f / impressions_count.to_f) * 100).round
+    end
+  end
+
+  def avg_days
+    if publish_date < Date.today
+      if end_date > Date.today
+        days = (Date.today - publish_date).to_i
+      else
+        days = (end_date - publish_date).to_i
+      end
+      return days
+    else
+      return 0
+    end
+  end
+
+  def avg_daily_clicks
+    return (visits.all_values_total/ avg_days).to_f.round(2) if !avg_days.eql?(0)
+    return 0.0
+  end
+
+  def avg_daily_views
+    return (impressions.all_values_total / avg_days).to_f  if !avg_days.eql?(0)
+    return 0.0
+  end
+
+  def impressions_count
+    return impressions.all_values_total
+  end
+
+
     module ClassMethods
       # Adds analytics tracking for +name+. Adds a +'name'_data+ mongoid
       # field as a Hash for tracking this information. Additionaly, hiddes
